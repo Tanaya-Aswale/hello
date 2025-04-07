@@ -1,0 +1,131 @@
+###########################
+Author:- Tanaya
+
+Date:- 7-4-2025
+
+Description:- Required tools
+
+version:- v-1
+
+############################
+
+
+# Install AWS CLI
+
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+
+# Install Kubectl
+
+# Remove any existing broken kubectl
+sudo rm -f /usr/local/bin/kubectl
+
+# Download the kubectl binary (latest stable release)
+curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+
+# Make it executable
+chmod +x kubectl
+
+# Move it to a system path
+sudo mv kubectl /usr/local/bin/
+
+# Verify it works
+kubectl version --client
+
+
+
+# Install eksctl
+
+curl --silent --location "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz" | tar xz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin
+
+# Install Docker
+
+sudo yum install docker -y
+sudo systemctl start docker
+sudo usermod -aG docker ec2-user
+
+# check Versions of tools
+
+aws --version
+kubectl version --client
+eksctl version
+docker --version
+
+# configure AWS CLI in Ec2
+
+aws configure
+
+# Create EKS Cluster from Ec2 instance
+
+eksctl create cluster \
+--name my-cluster \
+--region ap-south-1 \
+--nodes 2 \
+--node-type t3.small \
+--with-oidc \
+--managed
+
+## wait for 15 minutes for Cluster creation 
+# Check Cluster connection
+
+kubectl get nodes
+
+
+# Clone your Github repo into Ec2
+
+git clone https://github.com/<your-username>/<your-repo>.git
+cd <your-repo>
+
+# build the Docker image using 
+
+docker build -t file1.txt .
+
+# Create an ECR Repository
+
+aws ecr create-repository --repository-name file1.txt --region ap-south-1
+
+after running this command, note down the repositoryUri , replace the image id in deployment.yaml with repositoryUri
+
+# authenticate Docker with ECR
+
+aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 340752836801.dkr.ecr.ap-south-1.amazonaws.com
+
+# Tag and Push the Image
+ 
+docker tag index:latest 340752836801.dkr.ecr.ap-south-1.amazonaws.com/index:latest
+
+docker push 340752836801.dkr.ecr.ap-south-1.amazonaws.com/index:latest
+
+# Create the Kubernetes Deployment Manifest
+
+# Apply the Deployment to EKS
+
+kubectl apply -f deployment.yaml
+
+# check pod status
+
+kubectl get pods
+
+# Apply the Service.yaml file
+
+kubectl apply -f service.yaml
+
+# wait for the External IP
+
+kubectl get svc file1-txt
+
+# Test the app
+
+curl http://<EXTERNAL-IP>
+
+# Test in the browser
+
+http://<EXTERNAL-IP>
+
+
+
+
+
