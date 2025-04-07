@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: file1.txt
+  name: file1-txt
   labels:
-    app: file1.txt
+    app: file1-txt
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: file1.txt
+      app: file1-txt
   template:
     metadata:
       labels:
-        app: file1.txt
+        app: file1-txt
     spec:
       containers:
-      - name: file1.txt
-        image: 340752836801.dkr.ecr.ap-south-1.amazonaws.com/file1.txt:latest
+      - name: file1-txt
+        image: 340752836801.dkr.ecr.ap-south-1.amazonaws.com/file1-txt:latest
         ports:
         - containerPort: 80
